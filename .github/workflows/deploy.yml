@@ -51,13 +51,23 @@ jobs:
               with:
                   creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-            - name: Get AKS admin credentials
+            - name: Install kubelogin
+              run: |
+                  curl -Lo kubelogin.zip https://github.com/Azure/kubelogin/releases/download/v0.1.6/kubelogin-linux-amd64.zip
+                  unzip kubelogin.zip -d kubelogin
+                  sudo mv kubelogin/bin/linux_amd64/kubelogin /usr/local/bin/kubelogin
+                  kubelogin --version
+
+            - name: Get AKS credentials
               run: |
                   az aks get-credentials \
                     --resource-group ${{ env.RESOURCE_GROUP }} \
                     --name ${{ env.CLUSTER_NAME }} \
-                    --admin \
                     --overwrite-existing
+
+            - name: Convert kubeconfig for AAD
+              run: |
+                  kubelogin convert-kubeconfig --login azurecli
 
             - name: Install Helm
               uses: azure/setup-helm@v3
