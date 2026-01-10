@@ -63,9 +63,11 @@ jobs:
                   version: "latest"
 
             - name: Install kubelogin
-              uses: Azure/setup-kubelogin@v1
-              with:
-                  kubelogin-version: "latest"
+              run: |
+                  curl -Lo kubelogin.zip https://github.com/Azure/kubelogin/releases/download/v0.1.0/kubelogin-linux-amd64.zip
+                  unzip kubelogin.zip -d kubelogin
+                  sudo mv kubelogin/bin/linux_amd64/kubelogin /usr/local/bin/kubelogin
+                  kubelogin --version
 
             - name: Deploy to AKS
               run: |
