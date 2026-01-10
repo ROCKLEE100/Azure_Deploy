@@ -51,11 +51,12 @@ jobs:
               with:
                   creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-            - name: Get AKS credentials
+            - name: Get AKS admin credentials
               run: |
                   az aks get-credentials \
                     --resource-group ${{ env.RESOURCE_GROUP }} \
                     --name ${{ env.CLUSTER_NAME }} \
+                    --admin \
                     --overwrite-existing
 
             - name: Install Helm
