@@ -30,15 +30,14 @@ jobs:
                   password: ${{ secrets.ACR_PASSWORD }}
 
             - run: |
-                  docker build . -t ${{ env.ACR_NAME }}.azurecr.io/devops-assistant-backend:${{ github.sha }} -f backend/Dockerfile
+                  docker build backend -t ${{ env.ACR_NAME }}.azurecr.io/devops-assistant-backend:${{ github.sha }}
                   docker push ${{ env.ACR_NAME }}.azurecr.io/devops-assistant-backend:${{ github.sha }}
 
             - name: Build and Push Frontend Image
               run: |
-                  docker build . -t ${{ env.ACR_NAME }}.azurecr.io/devops-assistant-frontend:${{ github.sha }} \
+                  docker build frontend -t ${{ env.ACR_NAME }}.azurecr.io/devops-assistant-frontend:${{ github.sha }} \
                     --build-arg VITE_AZURE_CLIENT_ID=${{ secrets.AZURE_CLIENT_ID }} \
-                    --build-arg VITE_AZURE_TENANT_ID=${{ secrets.AZURE_TENANT_ID }} \
-                    -f frontend/Dockerfile
+                    --build-arg VITE_AZURE_TENANT_ID=${{ secrets.AZURE_TENANT_ID }}
                   docker push ${{ env.ACR_NAME }}.azurecr.io/devops-assistant-frontend:${{ github.sha }}
 
     deploy:
