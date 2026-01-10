@@ -1,0 +1,13 @@
+fastapi
+uvicorn
+langchain
+langchain-groq
+langchain-community
+python-dotenv
+pydantic
+pydantic-settings
+python-jose[cryptography]
+python-multipart
+requests
+azure-identity
+azure-keyvault-secrets
