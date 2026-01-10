@@ -62,6 +62,11 @@ jobs:
               with:
                   version: "latest"
 
+            - name: Install kubelogin
+              uses: azure/setup-kubelogin@v1
+              with:
+                  kubelogin-version: "latest"
+
             - name: Deploy to AKS
               run: |
                   helm upgrade --install devops-assistant ${{ env.CHART_PATH }} \
