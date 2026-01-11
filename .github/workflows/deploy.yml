@@ -1,81 +1,82 @@
 name: Build and Deploy to AKS
 
 on:
-    push:
-        branches: ["main"]
-    workflow_dispatch:
+  push:
+    branches: ["main"]
+  workflow_dispatch:
 
 env:
-    ACR_NAME: adityazuretest
-    RESOURCE_GROUP: Azure_Practice
-    CLUSTER_NAME: adityaclustertest
-    CHART_PATH: ./helm
+  ACR_NAME: adityazuretest
+  RESOURCE_GROUP: Azure_Practice
+  CLUSTER_NAME: adityaclustertest
+  CHART_PATH: ./helm
 
 jobs:
-    build:
-        runs-on: ubuntu-latest
-        steps:
-            - uses: actions/checkout@v4
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
 
-            - name: Azure Login
-              uses: azure/login@v1
-              with:
-                  creds: ${{ secrets.AZURE_CREDENTIALS }}
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-            - name: Build and Push Backend Image
-              uses: azure/docker-login@v1
-              with:
-                  login-server: ${{ env.ACR_NAME }}.azurecr.io
-                  username: ${{ secrets.ACR_USERNAME }}
-                  password: ${{ secrets.ACR_PASSWORD }}
+      - name: Build and Push Backend Image
+        uses: azure/docker-login@v1
+        with:
+          login-server: ${{ env.ACR_NAME }}.azurecr.io
+          username: ${{ secrets.ACR_USERNAME }}
+          password: ${{ secrets.ACR_PASSWORD }}
 
-            - run: |
-                  docker build backend -t ${{ env.ACR_NAME }}.azurecr.io/devops-assistant-backend:${{ github.sha }}
-                  docker push ${{ env.ACR_NAME }}.azurecr.io/devops-assistant-backend:${{ github.sha }}
+      - run: |
+          docker build backend -t ${{ env.ACR_NAME }}.azurecr.io/devops-assistant-backend:${{ github.sha }}
+          docker push ${{ env.ACR_NAME }}.azurecr.io/devops-assistant-backend:${{ github.sha }}
 
-            - name: Build and Push Frontend Image
-              run: |
-                  docker build frontend -t ${{ env.ACR_NAME }}.azurecr.io/devops-assistant-frontend:${{ github.sha }} \
-                    --build-arg VITE_AZURE_CLIENT_ID=${{ secrets.AZURE_CLIENT_ID }} \
-                    --build-arg VITE_AZURE_TENANT_ID=${{ secrets.AZURE_TENANT_ID }}
-                  docker push ${{ env.ACR_NAME }}.azurecr.io/devops-assistant-frontend:${{ github.sha }}
+      - name: Build and Push Frontend Image
+        run: |
+          docker build frontend -t ${{ env.ACR_NAME }}.azurecr.io/devops-assistant-frontend:${{ github.sha }} \
+            --build-arg VITE_AZURE_CLIENT_ID=${{ secrets.AZURE_CLIENT_ID }} \
+            --build-arg VITE_AZURE_TENANT_ID=${{ secrets.AZURE_TENANT_ID }} \
+            --build-arg VITE_API_URL=https://devops-assistant.centralindia.cloudapp.azure.com/api
+          docker push ${{ env.ACR_NAME }}.azurecr.io/devops-assistant-frontend:${{ github.sha }}
 
-    deploy:
-        needs: build
-        runs-on: ubuntu-latest
-        steps:
-            - uses: actions/checkout@v4
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
 
-            - name: Azure Login
-              uses: azure/login@v1
-              with:
-                  creds: ${{ secrets.AZURE_CREDENTIALS }}
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-            - name: Install kubelogin
-              run: |
-                  curl -Lo kubelogin.zip https://github.com/Azure/kubelogin/releases/download/v0.1.6/kubelogin-linux-amd64.zip
-                  unzip kubelogin.zip -d kubelogin
-                  sudo mv kubelogin/bin/linux_amd64/kubelogin /usr/local/bin/kubelogin
-                  kubelogin --version
+      - name: Install kubelogin
+        run: |
+          curl -Lo kubelogin.zip https://github.com/Azure/kubelogin/releases/download/v0.1.6/kubelogin-linux-amd64.zip
+          unzip kubelogin.zip -d kubelogin
+          sudo mv kubelogin/bin/linux_amd64/kubelogin /usr/local/bin/kubelogin
+          kubelogin --version
 
-            - name: Get AKS credentials
-              run: |
-                  az aks get-credentials \
-                    --resource-group ${{ env.RESOURCE_GROUP }} \
-                    --name ${{ env.CLUSTER_NAME }} \
-                    --overwrite-existing
+      - name: Get AKS credentials
+        run: |
+          az aks get-credentials \
+            --resource-group ${{ env.RESOURCE_GROUP }} \
+            --name ${{ env.CLUSTER_NAME }} \
+            --overwrite-existing
 
-            - name: Convert kubeconfig for AAD
-              run: |
-                  kubelogin convert-kubeconfig --login azurecli
+      - name: Convert kubeconfig for AAD
+        run: |
+          kubelogin convert-kubeconfig --login azurecli
 
-            - name: Install Helm
-              uses: azure/setup-helm@v3
-              with:
-                  version: "latest"
+      - name: Install Helm
+        uses: azure/setup-helm@v3
+        with:
+          version: "v3.12.0"
 
-            - name: Deploy to AKS
-              run: |
-                  helm upgrade --install devops-assistant ${{ env.CHART_PATH }} \
-                    --set backend.image.tag=${{ github.sha }} \
-                    --set frontend.image.tag=${{ github.sha }}
+      - name: Deploy to AKS
+        run: |
+          helm upgrade --install devops-assistant ${{ env.CHART_PATH }} \
+            --set backend.image.tag=${{ github.sha }} \
+            --set frontend.image.tag=${{ github.sha }}

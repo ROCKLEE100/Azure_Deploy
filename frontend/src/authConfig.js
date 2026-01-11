@@ -1,9 +1,16 @@
 import { LogLevel } from "@azure/msal-browser";
 
+const clientId = import.meta.env.VITE_AZURE_CLIENT_ID;
+const tenantId = import.meta.env.VITE_AZURE_TENANT_ID;
+
+if (!clientId || !tenantId) {
+    throw new Error("Missing Azure configuration. Please check VITE_AZURE_CLIENT_ID and VITE_AZURE_TENANT_ID.");
+}
+
 export const msalConfig = {
     auth: {
-        clientId: import.meta.env.VITE_AZURE_CLIENT_ID,
-        authority: `https://login.microsoftonline.com/${import.meta.env.VITE_AZURE_TENANT_ID}`,
+        clientId: clientId,
+        authority: `https://login.microsoftonline.com/${tenantId}`,
         redirectUri: window.location.origin,
     },
     cache: {

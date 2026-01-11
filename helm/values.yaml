@@ -2,8 +2,10 @@ serviceAccount:
   create: false
   name: devops-assistant-sa
 
-podAnnotations:
+podLabels:
   azure.workload.identity/use: "true"
+
+podAnnotations: {}
 
 backend:
   replicaCount: 1
@@ -46,8 +48,11 @@ ingress:
           pathType: Prefix
           serviceName: backend
           servicePort: 8000
-
+  tls:
+    - secretName: devops-assistant-tls
+      hosts:
+        - devops-assistant.centralindia.cloudapp.azure.com
 azure:
-  keyVaultName: "kv-devops-assistant"
+  keyVaultName: adityavault
   tenantId: "ac371305-0f1d-47d3-8dd8-3d5f83dccf8b"
   userAssignedIdentityID: "1569110c-2b6d-45ac-ba6f-8996c7a8d253"
