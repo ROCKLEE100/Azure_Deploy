@@ -19,7 +19,7 @@ backend:
   env:
     MODEL_NAME: "llama-3.3-70b-versatile"
     AZURE_TENANT_ID: "common"
-    AZURE_CLIENT_ID: "41fc2583-2d08-4e54-a969-792fa000d9f6"
+    AZURE_CLIENT_ID: "cd7eeb97-7ffd-4369-bd04-c5b76df938ce"
 
 frontend:
   replicaCount: 1
