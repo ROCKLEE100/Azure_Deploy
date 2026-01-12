@@ -31,8 +31,10 @@ spec:
               mountPath: "/mnt/secrets-store"
               readOnly: true
           env:
-            - name: MODEL_NAME
-              value: {{ .Values.backend.env.MODEL_NAME }}
+            {{- range $key, $value := .Values.backend.env }}
+            - name: {{ $key }}
+              value: {{ $value | quote }}
+            {{- end }}
             - name: GROQ_API_KEY
               valueFrom:
                 secretKeyRef:
