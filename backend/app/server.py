@@ -48,6 +48,7 @@ async def verify_token(credentials: HTTPAuthorizationCredentials = Depends(secur
         jwt.get_unverified_claims(token)
         return token
     except Exception as e:
+        traceback.print_exc()
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail=f"Invalid authentication credentials: {str(e)}",
