@@ -37,17 +37,18 @@ ingress:
   enabled: true
   className: "nginx"
   annotations:
-    nginx.ingress.kubernetes.io/rewrite-target: /
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
     cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    nginx.ingress.kubernetes.io/use-regex: "true"
   hosts:
     - host: devops-assistant.centralindia.cloudapp.azure.com
       paths:
-        - path: /
-          pathType: Prefix
+        - path: /(.*)
+          pathType: ImplementationSpecific
           serviceName: frontend
           servicePort: 80
-        - path: /api
-          pathType: Prefix
+        - path: /api(/|$)(.*)
+          pathType: ImplementationSpecific
           serviceName: backend
           servicePort: 8000
   tls:
