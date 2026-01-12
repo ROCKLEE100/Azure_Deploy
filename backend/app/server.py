@@ -10,6 +10,7 @@ from jose.exceptions import JWTError
 import requests
 from app.config import settings
 import asyncio
+import traceback
 
 app = FastAPI(title="DevOps Assistant API")
 
@@ -65,6 +66,7 @@ async def chat_endpoint(request: ChatRequest, token: str = Depends(verify_token)
             ):
                 yield chunk.content
         except Exception as e:
+            traceback.print_exc()
             yield f"Error: {str(e)}"
 
     return StreamingResponse(generate(), media_type="text/plain")
