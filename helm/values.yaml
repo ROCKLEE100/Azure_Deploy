@@ -43,7 +43,7 @@ ingress:
   hosts:
     - host: devops-assistant.centralindia.cloudapp.azure.com
       paths:
-        - path: /(.*)
+        - path: /(|$)(.*)
           pathType: ImplementationSpecific
           serviceName: frontend
           servicePort: 80
