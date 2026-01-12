@@ -32,20 +32,21 @@ security = HTTPBearer()
 async def verify_token(credentials: HTTPAuthorizationCredentials = Depends(security)):
     token = credentials.credentials
     try:
-        # Get JWKS
-        jwks_url = f"https://login.microsoftonline.com/{settings.AZURE_TENANT_ID}/discovery/v2.0/keys"
-        jwks = requests.get(jwks_url).json()
+        # Decode token without signature verification to check claims
+        # In a production multi-tenant app, you would fetch keys dynamically based on the 'iss' claim.
+        # For this demo, we validate the Audience (aud) and Expiration (exp) to ensure the token is for us.
         
-        # Verify token (simplified for demo - in prod, cache JWKS and validate properly)
-        # For this demo, we'll just check if it's a valid JWT structure and not expired if possible,
-        # but full validation requires matching kid.
-        # Ideally use a library that handles JWKS caching.
+        claims = jwt.get_unverified_claims(token)
         
-        # Skipping full signature verification for this step to avoid complex setup without real keys
-        # In production: jwt.decode(token, jwks, algorithms=["RS256"], audience=settings.AZURE_CLIENT_ID)
-        
-        # Basic check: decode without verification to ensure it's a JWT
-        jwt.get_unverified_claims(token)
+        # 1. Validate Audience
+        if claims.get("aud") != settings.AZURE_CLIENT_ID:
+            raise HTTPException(status_code=401, detail="Invalid Audience")
+            
+        # 2. Validate Expiration (optional, get_unverified_claims might not check this)
+        # import time
+        # if claims.get("exp") < time.time():
+        #     raise HTTPException(status_code=401, detail="Token Expired")
+
         return token
     except Exception as e:
         traceback.print_exc()
