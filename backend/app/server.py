@@ -32,6 +32,14 @@ security = HTTPBearer()
 async def verify_token(credentials: HTTPAuthorizationCredentials = Depends(security)):
     token = credentials.credentials
     try:
+        # LOGGING RAW TOKEN FOR DEBUGGING
+        print(f"DEBUG: Received token length: {len(token)}")
+        print(f"DEBUG: Token start: {token[:10]}...")
+        if "." in token:
+            print(f"DEBUG: Token segments: {len(token.split('.'))}")
+        else:
+            print("DEBUG: Token has NO segments (no dots)")
+
         # Decode token without signature verification to check claims
         # In a production multi-tenant app, you would fetch keys dynamically based on the 'iss' claim.
         # For this demo, we validate the Audience (aud) and Expiration (exp) to ensure the token is for us.
