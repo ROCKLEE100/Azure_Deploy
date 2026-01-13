@@ -32,40 +32,35 @@ security = HTTPBearer()
 async def verify_token(credentials: HTTPAuthorizationCredentials = Depends(security)):
     token = credentials.credentials
     try:
-        # LOGGING RAW TOKEN FOR DEBUGGING
-        print(f"DEBUG: Received token length: {len(token)}")
-        print(f"DEBUG: Token start: {token[:10]}...")
-        if "." in token:
-            print(f"DEBUG: Token segments: {len(token.split('.'))}")
+        # For Azure AD tokens (both JWT and opaque), we validate via Azure's userinfo endpoint
+        # This works regardless of token format
+        headers = {"Authorization": f"Bearer {token}"}
+        
+        # Use Microsoft Graph to validate the token
+        response = requests.get(
+            "https://graph.microsoft.com/v1.0/me",
+            headers=headers,
+            timeout=5
+        )
+        
+        if response.status_code == 200:
+            user_info = response.json()
+            print(f"DEBUG: Token validated successfully for user: {user_info.get('userPrincipalName', 'Unknown')}")
+            return token
         else:
-            print("DEBUG: Token has NO segments (no dots)")
-
-        # Decode token without signature verification to check claims
-        # In a production multi-tenant app, you would fetch keys dynamically based on the 'iss' claim.
-        # For this demo, we validate the Audience (aud) and Expiration (exp) to ensure the token is for us.
-        
-        claims = jwt.get_unverified_claims(token)
-        
-        # Log claims for debugging (IMPORTANT for multi-tenant issues)
-        print(f"DEBUG: Token Claims: {claims}")
-        print(f"DEBUG: Expected Audience: {settings.AZURE_CLIENT_ID}")
-        
-        # 1. Validate Audience
-        # The audience claim 'aud' identifies the intended recipient of the token. 
-        # For an app, this is usually the Application ID (Client ID).
-        token_aud = claims.get("aud")
-        if token_aud != settings.AZURE_CLIENT_ID:
-             # Sometimes 'aud' can be 'api://<client_id>' depending on how the scope was requested.
-             # We can check for that too if needed, but for now let's log the mismatch clearly.
-            print(f"ERROR: Invalid Audience. Received: {token_aud}, Expected: {settings.AZURE_CLIENT_ID}")
-            raise HTTPException(status_code=401, detail=f"Invalid Audience: {token_aud}")
-            
-        # 2. Validate Expiration (optional, get_unverified_claims might not check this)
-        # import time
-        # if claims.get("exp") < time.time():
-        #     raise HTTPException(status_code=401, detail="Token Expired")
-
-        return token
+            print(f"ERROR: Token validation failed. Status: {response.status_code}, Response: {response.text}")
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid token",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+    except requests.exceptions.RequestException as e:
+        print(f"ERROR: Failed to validate token with Microsoft Graph: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Token validation failed",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
     except Exception as e:
         traceback.print_exc()
         raise HTTPException(
