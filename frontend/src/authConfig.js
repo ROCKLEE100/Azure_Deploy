@@ -10,7 +10,9 @@ if (!clientId || !tenantId) {
 export const msalConfig = {
     auth: {
         clientId: clientId,
-        authority: `https://login.microsoftonline.com/${tenantId}`,
+        authority: tenantId === 'common'
+            ? 'https://login.microsoftonline.com/common'
+            : `https://login.microsoftonline.com/${tenantId}`,
         redirectUri: window.location.origin,
     },
     cache: {

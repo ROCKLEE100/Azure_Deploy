@@ -25,3 +25,7 @@ spec:
           env:
             - name: VITE_API_URL
               value: {{ .Values.frontend.env.VITE_API_URL }}
+            - name: VITE_AZURE_CLIENT_ID
+              value: {{ .Values.frontend.env.VITE_AZURE_CLIENT_ID }}
+            - name: VITE_AZURE_TENANT_ID
+              value: {{ .Values.frontend.env.VITE_AZURE_TENANT_ID }}
