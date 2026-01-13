@@ -38,9 +38,19 @@ async def verify_token(credentials: HTTPAuthorizationCredentials = Depends(secur
         
         claims = jwt.get_unverified_claims(token)
         
+        # Log claims for debugging (IMPORTANT for multi-tenant issues)
+        print(f"DEBUG: Token Claims: {claims}")
+        print(f"DEBUG: Expected Audience: {settings.AZURE_CLIENT_ID}")
+        
         # 1. Validate Audience
-        if claims.get("aud") != settings.AZURE_CLIENT_ID:
-            raise HTTPException(status_code=401, detail="Invalid Audience")
+        # The audience claim 'aud' identifies the intended recipient of the token. 
+        # For an app, this is usually the Application ID (Client ID).
+        token_aud = claims.get("aud")
+        if token_aud != settings.AZURE_CLIENT_ID:
+             # Sometimes 'aud' can be 'api://<client_id>' depending on how the scope was requested.
+             # We can check for that too if needed, but for now let's log the mismatch clearly.
+            print(f"ERROR: Invalid Audience. Received: {token_aud}, Expected: {settings.AZURE_CLIENT_ID}")
+            raise HTTPException(status_code=401, detail=f"Invalid Audience: {token_aud}")
             
         # 2. Validate Expiration (optional, get_unverified_claims might not check this)
         # import time
