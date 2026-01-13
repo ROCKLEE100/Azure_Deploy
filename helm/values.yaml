@@ -18,7 +18,7 @@ backend:
     port: 8000
   env:
     MODEL_NAME: "llama-3.3-70b-versatile"
-    AZURE_TENANT_ID: "common"
+    AZURE_TENANT_ID: "ac371305-0f1d-47d3-8dd8-3d5f83dccf8b"
     AZURE_CLIENT_ID: "cd7eeb97-7ffd-4369-bd04-c5b76df938ce"
 
 frontend:
