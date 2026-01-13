@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useMsal } from "@azure/msal-react";
-import { loginRequest } from "../authConfig";
+import { loginRequest, tokenRequest } from "../authConfig";
 import { Send, Bot, User, Loader2, Sparkles } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { clsx } from 'clsx';
@@ -121,7 +121,7 @@ export default function Chat() {
             // Acquire token silently
             const account = accounts[0];
             const responseToken = await instance.acquireTokenSilent({
-                ...loginRequest,
+                ...tokenRequest,
                 account: account
             });
 
@@ -129,7 +129,8 @@ export default function Chat() {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${responseToken.accessToken}`
+                    'Authorization': `Bearer ${responseToken.accessToken}`,
+                    'Ocp-Apim-Subscription-Key': import.meta.env.VITE_APIM_SUBSCRIPTION_KEY || ''
                 },
                 body: JSON.stringify({ message: userMessage, session_id: sessionId.current }),
             });
