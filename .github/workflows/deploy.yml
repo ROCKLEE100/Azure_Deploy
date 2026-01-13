@@ -38,7 +38,7 @@ jobs:
           docker build frontend -t ${{ env.ACR_NAME }}.azurecr.io/devops-assistant-frontend:${{ github.sha }} \
             --build-arg VITE_AZURE_CLIENT_ID=cd7eeb97-7ffd-4369-bd04-c5b76df938ce \
             --build-arg VITE_AZURE_TENANT_ID=common \
-            --build-arg VITE_API_URL=https://devops-assistant.centralindia.cloudapp.azure.com/api
+            --build-arg VITE_API_URL=https://adityaapim.azure-api.net/devops-assistant
           docker push ${{ env.ACR_NAME }}.azurecr.io/devops-assistant-frontend:${{ github.sha }}
 
   deploy:
