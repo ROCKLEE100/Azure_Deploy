@@ -31,7 +31,7 @@ frontend:
     type: ClusterIP
     port: 80
   env:
-    VITE_API_URL: "https://devops-assistant.centralindia.cloudapp.azure.com/api"
+    VITE_API_URL: "https://adityaapim.azure-api.net/devops-assistant"
 
 ingress:
   enabled: true
