@@ -49,5 +49,5 @@ export const loginRequest = {
 };
 
 export const tokenRequest = {
-    scopes: [`api://${clientId}/.default`],
+    scopes: [`api://${clientId}/access_as_user`],
 };
