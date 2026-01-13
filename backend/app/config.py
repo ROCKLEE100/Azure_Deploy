@@ -10,7 +10,7 @@ BACKEND_DIR = Path(__file__).parent.parent
 class Settings(BaseSettings):
     GROQ_API_KEY: str
     MODEL_NAME: str = "llama-3.3-70b-versatile"
-    AZURE_TENANT_ID: str = "common"
+    AZURE_TENANT_ID: str = "ac371305-0f1d-47d3-8dd8-3d5f83dccf8b"
     AZURE_CLIENT_ID: str = "client-id"
     KEY_VAULT_NAME: str = ""
     
