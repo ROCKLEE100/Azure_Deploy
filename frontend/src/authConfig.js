@@ -47,7 +47,7 @@ export const msalConfig = {
 };
 
 export const loginRequest = {
-    scopes: ["User.Read"],
+    scopes: [`api://${clientId}/access_as_user`],
 };
 
 export const tokenRequest = {
